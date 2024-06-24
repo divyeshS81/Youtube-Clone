@@ -9,12 +9,16 @@ import jack from "../../assets/jack.png"
 import user_profile from "../../assets/user_profile.jpg"
 import {API_KEY, value_converter} from "../../data"
 import moment from 'moment'
+import { useParams } from 'react-router-dom'
 
 
-const PlayVideo = ({videoId}) => {
+const PlayVideo = () => {
+
+    const {videoId} = useParams();
 
     const [apiData,setApiData] = useState(null);
     const [channelData,setChannelData] = useState(null);
+    const [commentData,setCommentData] = useState([]);
 
     const fetchVideoData = async () => {
         // Fetching videos data
@@ -29,12 +33,12 @@ const PlayVideo = ({videoId}) => {
 
 
         const comment_url =`https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&videoId=${videoId}&key=${API_KEY} `;
-        await fetch(comment_url).then(res=>res.json()).then(data => setCommentData(data.items[0]));
+        await fetch(comment_url).then(res=>res.json()).then(data=>setCommentData(data.items));
     }
 
     useEffect(() => {
         fetchVideoData();
-    }, [])
+    }, [videoId])
 
     useEffect(() => {
         fetchOtherData();
@@ -67,66 +71,25 @@ const PlayVideo = ({videoId}) => {
             <p>{apiData?apiData.snippet.description.slice(0,250):"Description Here"}</p>
             <hr />
             <h4>{apiData?value_converter(apiData.statistics.commentCount):102} Comments</h4>
-            <div className='comment'>
-                <img src={user_profile} alt="" />
-                <div>
-                    <h3>Jack Nicholson <span>1 day ago</span> </h3>
-                    <p>A global computer network providing a variety of information and communication facillites, consisting
-                    of interconnected networks using standrdized communication protocols.
-                    </p>
-                    <div className='comment-action'>
-                        <img src={like} alt="" />
-                        <span>244</span>
-                        <img src={dislike} alt="" />
-                     
+            {commentData.map((item,index)=>{
+
+                return(
+                    <div key={index} className='comment'>
+                    <img src={item.snippet.topLevelComment.snippet.authorProfileImageUrl} alt="" />
+                    <div>
+                        <h3>{item.snippet.topLevelComment.snippet.authorDisplayName} <span>1 day ago</span> </h3>
+                        <p>{item.snippet.topLevelComment.snippet.textDisplay}</p>
+                        <div className='comment-action'>
+                            <img src={like} alt="" />
+                            <span>{value_converter(item.snippet.topLevelComment.snippet.likeCount)}</span>
+                            <img src={dislike} alt="" />
+                         
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className='comment'>
-                <img src={user_profile} alt="" />
-                <div>
-                    <h3>Jack Nicholson <span>1 day ago</span> </h3>
-                    <p>A global computer network providing a variety of information and communication facillites, consisting
-                    of interconnected networks using standrdized communication protocols.
-                    </p>
-                    <div className='comment-action'>
-                        <img src={like} alt="" />
-                        <span>244</span>
-                        <img src={dislike} alt="" />
-                     
-                    </div>
-                </div>
-            </div>
-            <div className='comment'>
-                <img src={user_profile} alt="" />
-                <div>
-                    <h3>Jack Nicholson <span>1 day ago</span> </h3>
-                    <p>A global computer network providing a variety of information and communication facillites, consisting
-                    of interconnected networks using standrdized communication protocols.
-                    </p>
-                    <div className='comment-action'>
-                        <img src={like} alt="" />
-                        <span>244</span>
-                        <img src={dislike} alt="" />
-                     
-                    </div>
-                </div>
-            </div>
-            <div className='comment'>
-                <img src={user_profile} alt="" />
-                <div>
-                    <h3>Jack Nicholson <span>1 day ago</span> </h3>
-                    <p>A global computer network providing a variety of information and communication facillites, consisting
-                    of interconnected networks using standrdized communication protocols.
-                    </p>
-                    <div className='comment-action'>
-                        <img src={like} alt="" />
-                        <span>244</span>
-                        <img src={dislike} alt="" />
-                     
-                    </div>
-                </div>
-            </div>
+                )
+            })}
+           
         </div>
     </div>
   )
